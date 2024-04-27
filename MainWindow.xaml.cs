@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Security.Policy;
@@ -11,45 +12,13 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-
-namespace jstructs{
-    public static class jdata{
-        public static string[] job_states = { "UNAPPLIED", "PENDING", "EXPIRED", "ABORTED", "REJECTED" };
-        public enum fixed_job_states{
-            unapplied = 0,
-            pending = 1,
-            expired = 2,
-            aborted = 3,
-            rejected = 4,
-        }
-
-        public class jobject{
-            public string title;
-            public string employer;
-            public string link;
-            public string status;
-        }
-}}
-namespace jIO{
-    public class serializer{
-        public string save_path; // ??? this should be automatic?? or idk
-        public void serialize()
-        {
-            create_backup();
-        }
-        public void deserialize()
-        {
-
-        }
-        public void create_backup()
-        {
-
-        }
-    }
-}
+using jIO;
+using jstructs;
+using jURL;
 
 namespace jtrack
 {
@@ -59,30 +28,119 @@ namespace jtrack
     // differe+nt instructions for finding title, desc, & other details
     // inspect and manage listings
     // 
+    public partial class MainWindow : Window{
 
-
-
-
-
-
-
-
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public partial class MainWindow : Window
-    {
-
-
-        public MainWindow()
-        {
+        // //////////////////////////////// // ----------------------------------------------------------------
+        // MAIN LOADING & HELPER FUNCTIONS //
+        // ////////////////////////////// //
+        List<jdata.jobject> listings;
+        public MainWindow(){
             InitializeComponent();
+            // populate job manual status dropdown
+            jman_status.ItemsSource = jdata.job_states;
+            // TODO: we need to populate the listings filters
+
+            // deserialize listings from saved file if any
+            listings = jSerializer.deserialize();
+            reload_listings();
+        }
+        private void reload_listings() { 
+
+        }
+        private void Grid_KeyDown(object sender, KeyEventArgs e){
+            if (e.Key == Key.Escape) keypress_for_abort();
+        }
+        void PostError(string error) => error_text.Text = error;
+        // ----------------------------------------------------------------------------------------------------
+
+        // ////////////////////////////////// // --------------------------------------------------------------------------
+        // STUFF FOR ADDING NEW JOB LISTINGS //
+        // //////////////////////////////// //
+        bool new_listing_open = false;
+        bool processing_url = false;
+        string? curr_listing_link = null;
+        private void Button_NewListing(object sender, RoutedEventArgs e){
+            if (new_listing_open){
+                PostError("New listing UI already open!!");
+                return;}
+            // open up listing UI
+            new_listing_panel.Visibility = Visibility.Visible;
+            new_listing_link_panel.Visibility = Visibility.Visible;
+            // clear any data inside the boxes
+            jauto_link.Text = "";
+            jman_title.Text = "";
+            jman_employer.Text = "";
+            jman_status.SelectedIndex = 0;
+            curr_listing_link = null;
+            new_listing_open = true;
+            processing_url = false;
         }
 
-        // add new job listing
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
+        private async void Button_ManualSubmit(object sender, RoutedEventArgs e){
+            if (processing_url){
+                PostError("Already processing url request!!");
+                return;}
 
+            processing_url = true;
+            curr_listing_link = jauto_link.Text;
+            // check for errors in link
+            if (string.IsNullOrWhiteSpace(curr_listing_link)){
+                PostError("Empty link!!");
+                CloseNewListingUI();
+                return;}
+
+            // then process url
+            new_listing_link_panel.Visibility = Visibility.Collapsed;
+            new_listing_waiting_symbol.Visibility = Visibility.Visible;
+            var job_data = await URLprocessor.Process(curr_listing_link);
+
+            // finished loading url, process found data
+            if (job_data.found_all_data) {
+                PostNewListing(job_data.company, job_data.title, curr_listing_link, jdata.job_states[(int)jdata.fixed_job_states.unapplied]);
+                CloseNewListingUI();
+                return;}
+
+            // pass in any data that we did manage to pull ('else if' because if both were valid we'd have returned true)
+            if (!string.IsNullOrWhiteSpace(job_data.title)) jman_title.Text = job_data.title;
+            else if (!string.IsNullOrWhiteSpace(job_data.company)) jman_employer.Text = job_data.company;
+
+            // open manual details UI
+            new_listing_waiting_symbol.Visibility = Visibility.Collapsed;
+            new_listing_details_panel.Visibility = Visibility.Visible;
         }
+        private void Button_Submit(object sender, RoutedEventArgs e){
+            if (string.IsNullOrWhiteSpace(jman_title.Text) || string.IsNullOrWhiteSpace(jman_employer.Text) || jman_status.SelectedIndex == -1){
+                PostError("Empty/null listing data, try again!!");
+                return;}
+            // otherwise go ahead and submit the data and close out the listing
+            PostNewListing(jman_title.Text, jman_employer.Text, curr_listing_link, jdata.job_states[(int)jman_status.SelectedIndex]);
+            CloseNewListingUI();
+        }
+        private void PostNewListing(string company, string title, string link, string status){
+            jdata.jobject data_obj = new();
+            data_obj.employer = company;
+            data_obj.title = title;
+            data_obj.link = link;
+            data_obj.status = status;
+            listings.Add(data_obj);
+            jSerializer.serialize(listings);
+            reload_listings();
+        }
+        private void CloseNewListingUI(){
+            if (!new_listing_open){
+                PostError("Failed to close new listing UI because it was not open!!");
+                return;}
+            new_listing_panel.Visibility = Visibility.Collapsed;
+            new_listing_link_panel.Visibility = Visibility.Collapsed;
+            new_listing_waiting_symbol.Visibility = Visibility.Collapsed;
+            new_listing_details_panel.Visibility = Visibility.Collapsed;
+            new_listing_open = false;
+            processing_url = false;
+        }
+        private void keypress_for_abort(){
+            if (!new_listing_open) return;
+            CloseNewListingUI();
+        }
+        // ----------------------------------------------------------------------------------------------------------------------
     }
 }

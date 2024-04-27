@@ -38,7 +38,7 @@ namespace jIO{
         public string save_path; // ??? this should be automatic?? or idk
         public void serialize()
         {
-
+            create_backup();
         }
         public void deserialize()
         {
@@ -77,6 +77,12 @@ namespace jtrack
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        // add new job listing
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

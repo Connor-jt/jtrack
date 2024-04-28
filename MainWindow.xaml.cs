@@ -65,33 +65,32 @@ namespace jtrack
                  listing_menu.Visibility = Visibility.Collapsed;
             else listing_menu.Visibility = Visibility.Visible;
         }
-        public void ListingOrderUp(){
+        public void ListingOrderUp(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
             if (listings_panel.SelectedIndex == 0) return; // cant shift up if we're already at 0
-            // pop it then add it at the new index
-            var item = listings[listings_panel.SelectedIndex];
-            listings.RemoveAt(listings_panel.SelectedIndex);
-            listings.Insert(listings_panel.SelectedIndex-1, item);
-            // save changes to disk
-            jSerializer.serialize(listings); 
-            reload_listings();
+            ListingSwap(listings_panel.SelectedIndex-1);
         }
-        public void ListingOrderDown(){
+        public void ListingOrderDown(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return; }
             if (listings_panel.SelectedIndex >= listings.Count-1) return; // cant shift down if we're at the bottom
+            ListingSwap(listings_panel.SelectedIndex+1);
+        }
+        private void ListingSwap(int dst){
             // pop it then add it at the new index
             var item = listings[listings_panel.SelectedIndex];
             listings.RemoveAt(listings_panel.SelectedIndex);
-            listings.Insert(listings_panel.SelectedIndex+1, item);
+            listings.Insert(dst, item);
             // save changes to disk
-            jSerializer.serialize(listings); 
+            jSerializer.serialize(listings);
             reload_listings();
+            listings_panel.SelectedIndex = dst;
         }
-        public void ListingLink(){
+        public void ListingLink(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
-            System.Diagnostics.Process.Start(listings[listings_panel.SelectedIndex].link);
+            try{System.Diagnostics.Process.Start(listings[listings_panel.SelectedIndex].link);
+            } catch(Exception ex){PostError(ex.Message);}
         }
-        public void ListingRemove(){
+        public void ListingRemove(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
             // confirm that we actually want to delete the item!!
             if (MessageBox.Show("Are you sure you want to delete this item?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes){

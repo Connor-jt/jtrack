@@ -144,7 +144,12 @@ namespace jtrack
             // then process url
             new_listing_link_panel.Visibility = Visibility.Collapsed;
             new_listing_waiting_symbol.Visibility = Visibility.Visible;
-            var job_data = await URLprocessor.Process(curr_listing_link);
+            var job_data_wrapper = await URLprocessor.Process(curr_listing_link);
+            if (job_data_wrapper == null){ // check to see if processor failed!!
+                PostError("Failed to process url!!");
+                CloseNewListingUI();
+                return;}
+            URLprocessor.URL_result job_data = (URLprocessor.URL_result)job_data_wrapper;
 
             // finished loading url, process found data
             if (job_data.found_all_data) {

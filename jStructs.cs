@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace jstructs{
     public static class jdata{
         public static readonly string[] job_states = { "UNAPPLIED", "PENDING", "EXPIRED", "ABORTED", "REJECTED" };
-        public enum fixed_job_states{
+        public enum fixed_job_states : byte{
             unapplied = 0,
             pending = 1,
             expired = 2,
@@ -18,6 +18,6 @@ namespace jstructs{
             public string title;
             public string employer;
             public string link;
-            public string status;
+            public fixed_job_states status;
         }
 }}

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using jstructs;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +22,16 @@ namespace jtrack
     /// </summary>
     public partial class JobListing : UserControl
     {
-        public JobListing()
+        private string access_link;
+        public JobListing(string title, string employer, string link, jdata.fixed_job_states status)
         {
             InitializeComponent();
+            status_box.ItemsSource = jdata.job_states;
+            status_box.SelectedIndex = (int)status;
+
+            title_box.Text = title;
+            employer_box.Text = employer;
+            access_link = link;
         }
     }
 }

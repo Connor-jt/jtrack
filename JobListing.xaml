@@ -7,12 +7,10 @@
              mc:Ignorable="d" 
              d:DesignHeight="20" d:DesignWidth="800">
     <StackPanel Orientation="Horizontal">
-        <ComboBox Width="90" Margin="0, 0, 20, 0"/>
-        <TextBlock Text="Job Title" Foreground="White" Margin="0, 0, 20, 0" VerticalAlignment="Center"/>
-        <TextBlock Text="Employer" Foreground="White" Margin="0, 0, 20, 0" VerticalAlignment="Center"/>
-        <TextBlock Text=""/>
-        <TextBlock Text=""/>
-        <Button Content="Link" Margin="0, 0, 10, 0"/>
-        <Button Content="X" Width="20"/>
+        <ComboBox x:Name="status_box" Width="90" Margin="0, 0, 20, 0"/>
+        <TextBlock x:Name="title_box" Text="Job Title" Width="200" Foreground="White" Margin="0, 0, 20, 0" VerticalAlignment="Center"/>
+        <TextBlock x:Name="employer_box" Text="Employer" Width="100" Foreground="White" Margin="0, 0, 20, 0" VerticalAlignment="Center"/>
+        <Button x:Name="link_box" Content="Open Link" Margin="0, 0, 10, 0"/>
+        <Button x:Name="delete_box" Content="X" Width="20" Foreground="Red"/>
     </StackPanel>
 </UserControl>

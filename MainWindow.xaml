@@ -14,7 +14,7 @@
             <TextBlock Text="Rejected: 0" Foreground="White"/>
         </StackPanel>
         <Button Content="+" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Click="Button_NewListing"/>
-        <ListView Margin="0, 20, 0, 0" Background="Transparent">
+        <ListView x:Name="listings_panel" Margin="0, 20, 0, 0" Background="Transparent">
             
         </ListView>
 

@@ -19,8 +19,7 @@ namespace jIO{
             if (File.Exists(backup_path)) File.Delete(backup_path); // clear old backup if it exists
             File.Copy(save_path, backup_path);
         }
-        public static void serialize(List<jdata.jobject> current_listings)
-        {
+        public static void serialize(List<jdata.jobject> current_listings){
             create_backup();
             using (var fs = new FileStream(save_path, FileMode.Create, FileAccess.Write)){
                 // encode file signature

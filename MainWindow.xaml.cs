@@ -44,8 +44,12 @@ namespace jtrack
             listings = jSerializer.deserialize();
             reload_listings();
         }
-        private void reload_listings() { 
-
+        private void reload_listings() {
+            List<JobListing> UI_list = new();
+            for (int i = 0; i < listings.Count; i++)
+                // NOTE: we should filter out ones that dont match active filters??
+                UI_list.Add(new JobListing(listings[i].title, listings[i].employer, listings[i].link, listings[i].status));
+            listings_panel.ItemsSource = UI_list;
         }
         private void Grid_KeyDown(object sender, KeyEventArgs e){
             if (e.Key == Key.Escape) keypress_for_abort();
@@ -96,7 +100,7 @@ namespace jtrack
 
             // finished loading url, process found data
             if (job_data.found_all_data) {
-                PostNewListing(job_data.company, job_data.title, curr_listing_link, jdata.job_states[(int)jdata.fixed_job_states.unapplied]);
+                PostNewListing(job_data.company, job_data.title, curr_listing_link, jdata.fixed_job_states.unapplied);
                 CloseNewListingUI();
                 return;}
 
@@ -113,17 +117,17 @@ namespace jtrack
                 PostError("Empty/null listing data, try again!!");
                 return;}
             // otherwise go ahead and submit the data and close out the listing
-            PostNewListing(jman_title.Text, jman_employer.Text, curr_listing_link, jdata.job_states[(int)jman_status.SelectedIndex]);
+            PostNewListing(jman_title.Text, jman_employer.Text, curr_listing_link, (jdata.fixed_job_states)jman_status.SelectedIndex);
             CloseNewListingUI();
         }
-        private void PostNewListing(string company, string title, string link, string status){
+        private void PostNewListing(string company, string title, string link, jdata.fixed_job_states status){
             jdata.jobject data_obj = new();
             data_obj.employer = company;
             data_obj.title = title;
             data_obj.link = link;
             data_obj.status = status;
             listings.Add(data_obj);
-            jSerializer.serialize(listings);
+            jSerializer.serialize(listings); // save changes to disk
             reload_listings();
         }
         private void CloseNewListingUI(){

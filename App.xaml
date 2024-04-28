@@ -9,7 +9,7 @@
         <SolidColorBrush x:Key="_Global.Background.Light" Color="#FF1F1F1F"/>
         <SolidColorBrush x:Key="_Global.Background.Dark" Color="#FF1A1A1A"/>
         <SolidColorBrush x:Key="_Global.Activated" Color="#FF7160E8"/>
-        <SolidColorBrush x:Key="_Global.Hover.Background" Color="#FF383838"/>
+        <SolidColorBrush x:Key="_Global.Hover.Background" Color="#2F383838"/>
         <SolidColorBrush x:Key="_Global.Hover.Border" Color="#FF4D4D4D"/>
         
         <!-- TEXT BOX -->
@@ -71,7 +71,7 @@
         <!-- BUTTON -->
         <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="{x:Null}"/>
-            <Setter Property="BorderBrush" Value="{x:Null}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource _Global.Border}"/>
             <Setter Property="Foreground" Value="{StaticResource _Global.Text}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="HorizontalContentAlignment" Value="Center"/>

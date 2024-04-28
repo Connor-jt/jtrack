@@ -14,7 +14,7 @@ namespace jURL{
         public static async Task<URL_result> Process(string link){
             URL_result result = new URL_result();
             result.title = "test title";
-            result.company = "test company";
+            //result.company = "test company";
 
 
             // return true if all data was found

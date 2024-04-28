@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -22,16 +23,26 @@ namespace jtrack
     /// </summary>
     public partial class JobListing : UserControl
     {
-        private string access_link;
-        public JobListing(string title, string employer, string link, jdata.fixed_job_states status)
+        private MainWindow main;
+        private jdata.jobject data;
+        private bool initialized = false;
+        public JobListing(jdata.jobject data_obj, MainWindow callback)
         {
             InitializeComponent();
             status_box.ItemsSource = jdata.job_states;
-            status_box.SelectedIndex = (int)status;
+            status_box.SelectedIndex = (int)data_obj.status;
 
-            title_box.Text = title;
-            employer_box.Text = employer;
-            access_link = link;
+            title_box.Text = data_obj.title;
+            employer_box.Text = data_obj.employer;
+            data = data_obj;
+            main = callback;
+            initialized = true;
+        }
+
+        private void StatusChanged(object sender, SelectionChangedEventArgs e){
+            if (!initialized) return;
+            data.status = (jdata.fixed_job_states)status_box.SelectedIndex;
+            main.ListingUpdated();
         }
     }
 }

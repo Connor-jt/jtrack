@@ -48,7 +48,7 @@ namespace jtrack
             List<JobListing> UI_list = new();
             for (int i = 0; i < listings.Count; i++)
                 // NOTE: we should filter out ones that dont match active filters??
-                UI_list.Add(new JobListing(listings[i].title, listings[i].employer, listings[i].link, listings[i].status));
+                UI_list.Add(new JobListing(listings[i], this));
             listings_panel.ItemsSource = UI_list;
         }
         private void Grid_KeyDown(object sender, KeyEventArgs e){
@@ -56,6 +56,55 @@ namespace jtrack
         }
         void PostError(string error) => error_text.Text = error;
         // ----------------------------------------------------------------------------------------------------
+
+        // ///////////////////////////////// // --------------------------------------------------------------
+        // MANUAL LISTING ITEM INTERACTIONS //
+        // /////////////////////////////// //
+        private void listings_panel_SelectionChanged(object sender, SelectionChangedEventArgs e){
+            if (listings_panel.SelectedIndex == -1)
+                 listing_menu.Visibility = Visibility.Collapsed;
+            else listing_menu.Visibility = Visibility.Visible;
+        }
+        public void ListingOrderUp(){
+            if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
+            if (listings_panel.SelectedIndex == 0) return; // cant shift up if we're already at 0
+            // pop it then add it at the new index
+            var item = listings[listings_panel.SelectedIndex];
+            listings.RemoveAt(listings_panel.SelectedIndex);
+            listings.Insert(listings_panel.SelectedIndex-1, item);
+            // save changes to disk
+            jSerializer.serialize(listings); 
+            reload_listings();
+        }
+        public void ListingOrderDown(){
+            if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return; }
+            if (listings_panel.SelectedIndex >= listings.Count-1) return; // cant shift down if we're at the bottom
+            // pop it then add it at the new index
+            var item = listings[listings_panel.SelectedIndex];
+            listings.RemoveAt(listings_panel.SelectedIndex);
+            listings.Insert(listings_panel.SelectedIndex+1, item);
+            // save changes to disk
+            jSerializer.serialize(listings); 
+            reload_listings();
+        }
+        public void ListingLink(){
+            if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
+            System.Diagnostics.Process.Start(listings[listings_panel.SelectedIndex].link);
+        }
+        public void ListingRemove(){
+            if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
+            // confirm that we actually want to delete the item!!
+            if (MessageBox.Show("Are you sure you want to delete this item?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes){
+                listings.RemoveAt(listings_panel.SelectedIndex);
+                jSerializer.serialize(listings); // save changes to disk
+                reload_listings();
+            }
+        }
+        public void ListingUpdated(){
+            jSerializer.serialize(listings); // save changes to disk
+            reload_listings();
+        }
+        // --------------------------------------------------------------------------------------------------------
 
         // ////////////////////////////////// // --------------------------------------------------------------------------
         // STUFF FOR ADDING NEW JOB LISTINGS //
@@ -80,7 +129,7 @@ namespace jtrack
             processing_url = false;
         }
 
-        private async void Button_ManualSubmit(object sender, RoutedEventArgs e){
+        private async void Button_AutoSubmit(object sender, RoutedEventArgs e){
             if (processing_url){
                 PostError("Already processing url request!!");
                 return;}
@@ -112,12 +161,12 @@ namespace jtrack
             new_listing_waiting_symbol.Visibility = Visibility.Collapsed;
             new_listing_details_panel.Visibility = Visibility.Visible;
         }
-        private void Button_Submit(object sender, RoutedEventArgs e){
+        private void Button_ManualSubmit(object sender, RoutedEventArgs e){
             if (string.IsNullOrWhiteSpace(jman_title.Text) || string.IsNullOrWhiteSpace(jman_employer.Text) || jman_status.SelectedIndex == -1){
                 PostError("Empty/null listing data, try again!!");
                 return;}
             // otherwise go ahead and submit the data and close out the listing
-            PostNewListing(jman_title.Text, jman_employer.Text, curr_listing_link, (jdata.fixed_job_states)jman_status.SelectedIndex);
+            PostNewListing(jman_employer.Text, jman_title.Text, curr_listing_link, (jdata.fixed_job_states)jman_status.SelectedIndex);
             CloseNewListingUI();
         }
         private void PostNewListing(string company, string title, string link, jdata.fixed_job_states status){
@@ -145,6 +194,7 @@ namespace jtrack
             if (!new_listing_open) return;
             CloseNewListingUI();
         }
+
         // ----------------------------------------------------------------------------------------------------------------------
     }
 }

@@ -7,14 +7,42 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Background="#FF111317" KeyDown="Grid_KeyDown">
-        <StackPanel Orientation="Horizontal" Height="20px" VerticalAlignment="Top" HorizontalAlignment="Center">
-            <TextBlock Text="Jobs: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-            <TextBlock Text="Pending: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-            <TextBlock Text="Unapplied: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-            <TextBlock Text="Rejected: 0" Foreground="White"/>
-        </StackPanel>
-        <Button Content="+" Width="20" Height="20" HorizontalAlignment="Right" VerticalAlignment="Top" Click="Button_NewListing"/>
-        <ListView x:Name="listings_panel" Margin="0, 20, 0, 0" Background="Transparent">
+        <Grid Height="20px" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="Jobs: 0" Foreground="White" Margin="0, 0, 10, 0"/>
+                <TextBlock Text="Pending: 0" Foreground="White" Margin="0, 0, 10, 0"/>
+                <TextBlock Text="Unapplied: 0" Foreground="White" Margin="0, 0, 10, 0"/>
+                <TextBlock Text="Rejected: 0" Foreground="White"/>
+            </StackPanel>
+            <Grid Grid.Column="1" >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="20"/>
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="listing_menu" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="20"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="⮟" Grid.Column="0" Click="ListingOrderDown" BorderBrush="{x:Null}"/>
+                    <Button Content="⮝" Grid.Column="2" Click="ListingOrderUp" BorderBrush="{x:Null}"/>
+                    <Button Content="🔗" Grid.Column="4" Click="ListingLink" BorderBrush="{x:Null}"/>
+                    <Button Content="❌" Grid.Column="6" Click="ListingRemove" BorderBrush="{x:Null}" Foreground="Red"/>
+                </Grid>
+                <Button Content="➕" Grid.Column="1" Click="Button_NewListing" BorderBrush="{x:Null}"/>
+            </Grid>
+        </Grid>
+        <ListView x:Name="listings_panel" Margin="0, 20, 0, 0" Background="Transparent" SelectionChanged="listings_panel_SelectionChanged">
             
         </ListView>
 
@@ -53,7 +81,7 @@
                     <TextBlock Text="Job Link" Foreground="White" Grid.Column="0"/>
                     <TextBox x:Name="jauto_link" MinWidth="300" Grid.Column="1"/>
                 </Grid>
-                <Button Content="Submit" Width="100" Click="Button_Submit"/>
+                <Button Content="Submit" Width="100" Click="Button_AutoSubmit"/>
             </StackPanel>
 
             <StackPanel x:Name="new_listing_details_panel" HorizontalAlignment="Center" VerticalAlignment="Center"  Visibility="Collapsed">
@@ -79,6 +107,6 @@
             </StackPanel>
         </Grid>
 
-        <TextBlock x:Name="error_text" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+        <TextBlock x:Name="error_text" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="Red"/>
     </Grid>
 </Window>

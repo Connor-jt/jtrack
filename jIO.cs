@@ -19,11 +19,14 @@ namespace jIO{
             if (File.Exists(backup_path)) File.Delete(backup_path); // clear old backup if it exists
             File.Copy(save_path, backup_path);
         }
-        public static void serialize(List<jdata.jobject> current_listings){
+        public static void serialize(List<jdata.jobject> current_listings, uint filters){
             create_backup();
             using (var fs = new FileStream(save_path, FileMode.Create, FileAccess.Write)){
                 // encode file signature
                 byte[] bytes = BitConverter.GetBytes(file_signature);
+                fs.Write(bytes, 0, 4);
+                // encode filters
+                bytes = BitConverter.GetBytes(filters);
                 fs.Write(bytes, 0, 4);
                 // encode object count
                 bytes = BitConverter.GetBytes(current_listings.Count);
@@ -50,7 +53,7 @@ namespace jIO{
             fs.Write(buffer, 0, length);
             return;
         }
-        public static List<jdata.jobject> deserialize(){
+        public static List<jdata.jobject> deserialize(ref uint filters){
             // fallback for no file
             if (!File.Exists(save_path)) return new();
 
@@ -61,6 +64,9 @@ namespace jIO{
                 if (BitConverter.ToUInt32(bytes) != file_signature)
                     throw new Exception("Bad file signature on serialized data file!!");
 
+                // decode the filters
+                fs.Read(bytes, 0, 4);
+                filters = BitConverter.ToUInt32(bytes);
                 // read the 4byte string count indicator
                 fs.Read(bytes, 0, 4);
                 uint objects_count = BitConverter.ToUInt32(bytes);

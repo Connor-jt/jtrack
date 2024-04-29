@@ -42,21 +42,65 @@ namespace jtrack
             // TODO: we need to populate the listings filters
 
             // deserialize listings from saved file if any
-            listings = jSerializer.deserialize();
+            listings = jSerializer.deserialize(ref filter_map);
+            LoadFilterUI();
             reload_listings();
         }
         private void reload_listings() {
+            // store our currently selected member
+            jdata.jobject? selected_job = null;
+            if (listings_panel.SelectedIndex != -1)
+                selected_job = ((List<JobListing>)listings_panel.ItemsSource)[listings_panel.SelectedIndex].data;
+
+            // reset filter stats
+            foreach (var v in filter_UIs) v.matching_count = 0;
+
             List<JobListing> UI_list = new();
-            for (int i = 0; i < listings.Count; i++)
-                // NOTE: we should filter out ones that dont match active filters??
-                UI_list.Add(new JobListing(listings[i], this));
+            for (int i = 0; i < listings.Count; i++){
+                byte curr_state = (byte)listings[i].status;
+                filter_UIs[curr_state].matching_count++;
+                if ((filter_map & (1u << curr_state)) == 0) // if '1', then we exclude on these filters??
+                    UI_list.Add(new JobListing(listings[i], this));
+            }
             listings_panel.ItemsSource = UI_list;
+
+            // post new filter stats
+            foreach (var v in filter_UIs) v.UpdateCount();
+            job_count_box.Text = listings.Count.ToString();
+            // reselect the previously selected entry if its still in the UI
+            if (selected_job != null){
+                for (int i = 0; i < UI_list.Count; i++){
+                    if (UI_list[i].data == selected_job){
+                        listings_panel.SelectedIndex = i;
+                        break;
+            }}}
         }
         private void Grid_KeyDown(object sender, KeyEventArgs e){
             if (e.Key == Key.Escape) keypress_for_abort();
         }
         void PostError(string error) => error_text.Text = error;
         // ----------------------------------------------------------------------------------------------------
+
+        // //////////////////////// // -----------------------------------------------------------------
+        // FILTER GENERATION STUFF //
+        // ////////////////////// //
+        private uint filter_map = 0;
+        private List<ListingsFilter> filter_UIs = new();
+        public void UpdateFilters(jdata.fixed_job_states filter, bool state){
+            if (state) filter_map |= (1u << (byte)filter);
+            else filter_map &= ~(1u << (byte)filter);
+            jSerializer.serialize(listings, filter_map);
+            reload_listings();
+        }
+        private void LoadFilterUI(){
+            for (int i = 0; i < jdata.job_states.Length; i++){
+                bool is_filter_disabled = (filter_map & (1u << i) ) != 0;
+                ListingsFilter curr_filter = new(this, (jdata.fixed_job_states)i, is_filter_disabled);
+                filters_panel.Children.Add(curr_filter);
+                filter_UIs.Add(curr_filter);
+            }
+        }
+        // ------------------------------------------------------------------------------------------
 
         // ///////////////////////////////// // --------------------------------------------------------------
         // MANUAL LISTING ITEM INTERACTIONS //
@@ -82,7 +126,7 @@ namespace jtrack
             listings.RemoveAt(listings_panel.SelectedIndex);
             listings.Insert(dst, item);
             // save changes to disk
-            jSerializer.serialize(listings);
+            jSerializer.serialize(listings, filter_map);
             reload_listings();
             listings_panel.SelectedIndex = dst;
         }
@@ -100,12 +144,12 @@ namespace jtrack
             // confirm that we actually want to delete the item!!
             if (MessageBox.Show("Are you sure you want to delete this item?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes){
                 listings.RemoveAt(listings_panel.SelectedIndex);
-                jSerializer.serialize(listings); // save changes to disk
+                jSerializer.serialize(listings, filter_map); // save changes to disk
                 reload_listings();
             }
         }
         public void ListingUpdated(){
-            jSerializer.serialize(listings); // save changes to disk
+            jSerializer.serialize(listings, filter_map); // save changes to disk
             reload_listings();
         }
         // --------------------------------------------------------------------------------------------------------
@@ -188,7 +232,7 @@ namespace jtrack
             data_obj.link = link;
             data_obj.status = status;
             listings.Add(data_obj);
-            jSerializer.serialize(listings); // save changes to disk
+            jSerializer.serialize(listings, filter_map); // save changes to disk
             reload_listings();
         }
         private void CloseNewListingUI(){
@@ -227,5 +271,15 @@ namespace jtrack
                 e.Handled = true;
                 Button_ManualSubmit(null, null);
         }}
+
+
+
+        // god bless this code
+        #region WindowBar_funcs 
+        private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e) { e.CanExecute = true; }
+        private void CommandBinding_Executed_Minimize(object sender, ExecutedRoutedEventArgs e) { SystemCommands.MinimizeWindow(this); }
+        private void CommandBinding_Executed_Close(object sender, ExecutedRoutedEventArgs e) { SystemCommands.CloseWindow(this); }
+
+        #endregion
     }
 }

@@ -5,111 +5,136 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:jtrack"
         mc:Ignorable="d"
+        WindowStyle="None"
         Title="MainWindow" Height="450" Width="800">
+    <!-- thank you IRTV man -->
+    <!--Add the WindowChrome object-->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="34" />
+    </WindowChrome.WindowChrome>
+    <!--Title bar button commands-->
+    <Window.CommandBindings>
+        <CommandBinding Command="{x:Static SystemCommands.CloseWindowCommand}" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed_Close" />
+        <CommandBinding Command="{x:Static SystemCommands.MinimizeWindowCommand}" CanExecute="CommandBinding_CanExecute" Executed="CommandBinding_Executed_Minimize" />
+    </Window.CommandBindings>
     <Grid x:Name="main_thing" Background="#FF111317" KeyDown="Grid_KeyDown">
-        <Grid Height="20px" VerticalAlignment="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right" >
+            <Button Style="{StaticResource MinimizeButtonStyle}" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Minimize" Command="{x:Static SystemCommands.MinimizeWindowCommand}" />
+            <Button Style="{StaticResource CloseButtonStyle}" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="Close" Command="{x:Static SystemCommands.CloseWindowCommand}"/>
+        </StackPanel>
+        <Grid Grid.Row="1">
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Jobs: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-                <TextBlock Text="Pending: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-                <TextBlock Text="Unapplied: 0" Foreground="White" Margin="0, 0, 10, 0"/>
-                <TextBlock Text="Rejected: 0" Foreground="White"/>
-            </StackPanel>
-            <Grid Grid.Column="1" >
+
+            <Grid Height="20px" VerticalAlignment="Top" Margin="0,10,0,0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="170"/>
-                    <ColumnDefinition Width="20"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Grid x:Name="listing_menu" Visibility="Collapsed">
+
+                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                    <TextBlock Text="JOBS" Foreground="White" Margin="0, 0, 10, 2" VerticalAlignment="Bottom"/>
+                    <TextBlock x:Name="job_count_box" Text="0" Foreground="#FFCAFFC8" Margin="0, 0, 10, 2" VerticalAlignment="Bottom"/>
+                    <StackPanel x:Name="filters_panel" Orientation="Horizontal">
+                    
+                    </StackPanel>
+                </StackPanel>
+                <Grid Grid.Column="1" >
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="20"/>
-                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="170"/>
                         <ColumnDefinition Width="20"/>
                     </Grid.ColumnDefinitions>
-                    <Button Content="⮟" Grid.Column="0" Click="ListingOrderDown" BorderBrush="{x:Null}"/>
-                    <Button Content="⮝" Grid.Column="2" Click="ListingOrderUp" BorderBrush="{x:Null}"/>
-                    <Button Content="📋" Grid.Column="4" Click="ListingLinkCopy" BorderBrush="{x:Null}"/>
-                    <Button Content="🔗" Grid.Column="6" Click="ListingLink" BorderBrush="{x:Null}"/>
-                    <Button Content="❌" Grid.Column="8" Click="ListingRemove" BorderBrush="{x:Null}" Foreground="Red"/>
+                    <Grid x:Name="listing_menu" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="20"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="20"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Content="⮟" Grid.Column="0" Click="ListingOrderDown" BorderBrush="{x:Null}"/>
+                        <Button Content="⮝" Grid.Column="2" Click="ListingOrderUp" BorderBrush="{x:Null}"/>
+                        <Button Content="📋" Grid.Column="4" Click="ListingLinkCopy" BorderBrush="{x:Null}"/>
+                        <Button Content="🔗" Grid.Column="6" Click="ListingLink" BorderBrush="{x:Null}"/>
+                        <Button Content="❌" Grid.Column="8" Click="ListingRemove" BorderBrush="{x:Null}" Foreground="Red"/>
+                    </Grid>
+                    <Button Content="➕" Grid.Column="1" Click="Button_NewListing" BorderBrush="{x:Null}"/>
                 </Grid>
-                <Button Content="➕" Grid.Column="1" Click="Button_NewListing" BorderBrush="{x:Null}"/>
-            </Grid>
-        </Grid>
-        <ListView x:Name="listings_panel" Margin="0, 20, 0, 0" Background="Transparent" SelectionChanged="listings_panel_SelectionChanged">
-            
-        </ListView>
-
-
-        <Grid x:Name="new_listing_panel" Background="#9019082B"  Visibility="Collapsed">
-            <Grid x:Name="new_listing_waiting_symbol" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <TextBlock Text="↻" FontSize="30" Foreground="White" Margin="-1,-4,1,4">
-                    <TextBlock.RenderTransform>
-                        <RotateTransform x:Name="TransRotate" CenterX="13.73" CenterY="23.95" Angle="0" />
-                    </TextBlock.RenderTransform>
-                    <TextBlock.Triggers>
-                        <EventTrigger RoutedEvent="TextBlock.Loaded">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation x:Name="da"
-                                         Storyboard.TargetName="TransRotate"
-                                         Storyboard.TargetProperty="Angle"
-                                         By="360"
-                                         Duration="0:0:2"
-                                         AutoReverse="False"
-                                         RepeatBehavior="Forever" />
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </TextBlock.Triggers>
-                </TextBlock>
             </Grid>
 
+            <ListView Margin="0, 30, 0, 0" x:Name="listings_panel" Background="Transparent" SelectionChanged="listings_panel_SelectionChanged" BorderBrush="{x:Null}">
 
-            <StackPanel x:Name="new_listing_link_panel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
-                <Grid HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="50"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Job Link" Foreground="White" Grid.Column="0"/>
-                    <TextBox x:Name="jauto_link" MinWidth="300" Grid.Column="1" KeyDown="jauto_link_KeyDown"/>
-                </Grid>
-                <Button Content="Submit" Width="100" Click="Button_AutoSubmit" Margin="0,20,0,0"/>
-            </StackPanel>
+            </ListView>
 
-            <StackPanel x:Name="new_listing_details_panel" HorizontalAlignment="Center" VerticalAlignment="Center"  Visibility="Collapsed">
-                <TextBlock Text="Unsupported site, insert details"  Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
-                <Grid HorizontalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="30"/>
-                        <RowDefinition Height="20"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="Job Title" Foreground="White" Grid.Column="0"/>
-                    <TextBox x:Name="jman_title" MinWidth="300" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_title_KeyDown"/>
-                    <TextBlock Text="Job Employer" Foreground="White" Grid.Row="1" Grid.Column="0"/>
-                    <TextBox x:Name="jman_employer" MinWidth="300" Grid.Row="1" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_employer_KeyDown"/>
-                    <TextBlock Text="Job Status" Foreground="White" Grid.Row="2" Grid.Column="0"/>
-                    <ComboBox x:Name="jman_status" Width="100" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
+
+            <Grid x:Name="new_listing_panel" Background="#9019082B"  Visibility="Collapsed">
+                <Grid x:Name="new_listing_waiting_symbol" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
+                    <TextBlock Text="↻" FontSize="30" Foreground="White" Margin="-1,-4,1,4">
+                        <TextBlock.RenderTransform>
+                            <RotateTransform x:Name="TransRotate" CenterX="13.73" CenterY="23.95" Angle="0" />
+                        </TextBlock.RenderTransform>
+                        <TextBlock.Triggers>
+                            <EventTrigger RoutedEvent="TextBlock.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation x:Name="da"
+                                             Storyboard.TargetName="TransRotate"
+                                             Storyboard.TargetProperty="Angle"
+                                             By="360"
+                                             Duration="0:0:2"
+                                             AutoReverse="False"
+                                             RepeatBehavior="Forever" />
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </TextBlock.Triggers>
+                    </TextBlock>
                 </Grid>
-                <Button Content="Submit" Width="100" Margin="0,20,0,0" Click="Button_ManualSubmit"/>
-            </StackPanel>
+
+
+                <StackPanel x:Name="new_listing_link_panel" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed">
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Job Link" Foreground="White" Grid.Column="0"/>
+                        <TextBox x:Name="jauto_link" MinWidth="300" Grid.Column="1" KeyDown="jauto_link_KeyDown"/>
+                    </Grid>
+                    <Button Content="Submit" Width="100" Click="Button_AutoSubmit" Margin="0,20,0,0"/>
+                </StackPanel>
+
+                <StackPanel x:Name="new_listing_details_panel" HorizontalAlignment="Center" VerticalAlignment="Center"  Visibility="Collapsed">
+                    <TextBlock Text="Unsupported site, insert details"  Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,20"/>
+                    <Grid HorizontalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="90"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="30"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Job Title" Foreground="White" Grid.Column="0"/>
+                        <TextBox x:Name="jman_title" MinWidth="300" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_title_KeyDown"/>
+                        <TextBlock Text="Job Employer" Foreground="White" Grid.Row="1" Grid.Column="0"/>
+                        <TextBox x:Name="jman_employer" MinWidth="300" Grid.Row="1" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_employer_KeyDown"/>
+                        <TextBlock Text="Job Status" Foreground="White" Grid.Row="2" Grid.Column="0"/>
+                        <ComboBox x:Name="jman_status" Width="100" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
+                    </Grid>
+                    <Button Content="Submit" Width="100" Margin="0,20,0,0" Click="Button_ManualSubmit"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock x:Name="error_text" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="Red"/>
         </Grid>
-
-        <TextBlock x:Name="error_text" Text="" VerticalAlignment="Bottom" HorizontalAlignment="Center" Foreground="Red"/>
     </Grid>
 </Window>

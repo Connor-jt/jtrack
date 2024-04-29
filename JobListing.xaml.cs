@@ -24,7 +24,7 @@ namespace jtrack
     public partial class JobListing : UserControl
     {
         private MainWindow main;
-        private jdata.jobject data;
+        public jdata.jobject data;
         private bool initialized = false;
         public JobListing(jdata.jobject data_obj, MainWindow callback)
         {

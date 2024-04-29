@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="jtrack.ListingsFilter"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:jtrack"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" d:DesignWidth="120">
+    <Button Height="20" Click="Button_Click" BorderBrush="Transparent" Background="Transparent" Margin="10 0 0 0">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="filter_title_box" Text="filter" Margin="0 0 10 0" Foreground="White" />
+            <TextBlock x:Name="count_text" Text="-" Grid.Column="1" Foreground="#FFCAFFC8"/>
+        </Grid>
+    </Button>
+</UserControl>

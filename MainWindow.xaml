@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:jtrack"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid Background="#FF111317" KeyDown="Grid_KeyDown">
+    <Grid x:Name="main_thing" Background="#FF111317" KeyDown="Grid_KeyDown">
         <Grid Height="20px" VerticalAlignment="Top">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -21,7 +21,7 @@
             </StackPanel>
             <Grid Grid.Column="1" >
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="170"/>
                     <ColumnDefinition Width="20"/>
                 </Grid.ColumnDefinitions>
                 <Grid x:Name="listing_menu" Visibility="Collapsed">
@@ -33,11 +33,14 @@
                         <ColumnDefinition Width="20"/>
                         <ColumnDefinition Width="10"/>
                         <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="20"/>
                     </Grid.ColumnDefinitions>
                     <Button Content="⮟" Grid.Column="0" Click="ListingOrderDown" BorderBrush="{x:Null}"/>
                     <Button Content="⮝" Grid.Column="2" Click="ListingOrderUp" BorderBrush="{x:Null}"/>
-                    <Button Content="🔗" Grid.Column="4" Click="ListingLink" BorderBrush="{x:Null}"/>
-                    <Button Content="❌" Grid.Column="6" Click="ListingRemove" BorderBrush="{x:Null}" Foreground="Red"/>
+                    <Button Content="📋" Grid.Column="4" Click="ListingLinkCopy" BorderBrush="{x:Null}"/>
+                    <Button Content="🔗" Grid.Column="6" Click="ListingLink" BorderBrush="{x:Null}"/>
+                    <Button Content="❌" Grid.Column="8" Click="ListingRemove" BorderBrush="{x:Null}" Foreground="Red"/>
                 </Grid>
                 <Button Content="➕" Grid.Column="1" Click="Button_NewListing" BorderBrush="{x:Null}"/>
             </Grid>
@@ -79,9 +82,9 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <TextBlock Text="Job Link" Foreground="White" Grid.Column="0"/>
-                    <TextBox x:Name="jauto_link" MinWidth="300" Grid.Column="1"/>
+                    <TextBox x:Name="jauto_link" MinWidth="300" Grid.Column="1" KeyDown="jauto_link_KeyDown"/>
                 </Grid>
-                <Button Content="Submit" Width="100" Click="Button_AutoSubmit"/>
+                <Button Content="Submit" Width="100" Click="Button_AutoSubmit" Margin="0,20,0,0"/>
             </StackPanel>
 
             <StackPanel x:Name="new_listing_details_panel" HorizontalAlignment="Center" VerticalAlignment="Center"  Visibility="Collapsed">
@@ -97,9 +100,9 @@
                         <RowDefinition Height="20"/>
                     </Grid.RowDefinitions>
                     <TextBlock Text="Job Title" Foreground="White" Grid.Column="0"/>
-                    <TextBox x:Name="jman_title" MinWidth="300" Grid.Column="1" Height="20" VerticalAlignment="Top"/>
+                    <TextBox x:Name="jman_title" MinWidth="300" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_title_KeyDown"/>
                     <TextBlock Text="Job Employer" Foreground="White" Grid.Row="1" Grid.Column="0"/>
-                    <TextBox x:Name="jman_employer" MinWidth="300" Grid.Row="1" Grid.Column="1" Height="20" VerticalAlignment="Top"/>
+                    <TextBox x:Name="jman_employer" MinWidth="300" Grid.Row="1" Grid.Column="1" Height="20" VerticalAlignment="Top" KeyDown="jman_employer_KeyDown"/>
                     <TextBlock Text="Job Status" Foreground="White" Grid.Row="2" Grid.Column="0"/>
                     <ComboBox x:Name="jman_status" Width="100" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left"/>
                 </Grid>

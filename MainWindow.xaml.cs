@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Security.Policy;
@@ -87,8 +88,12 @@ namespace jtrack
         }
         public void ListingLink(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
-            try{System.Diagnostics.Process.Start(listings[listings_panel.SelectedIndex].link);
+            try{Process.Start(new ProcessStartInfo { FileName = listings[listings_panel.SelectedIndex].link, UseShellExecute = true });
             } catch(Exception ex){PostError(ex.Message);}
+        }
+        public void ListingLinkCopy(object sender, RoutedEventArgs e){
+            if (listings_panel.SelectedIndex == -1) { PostError("No selected listing!!"); return; }
+            Clipboard.SetText(listings[listings_panel.SelectedIndex].link);
         }
         public void ListingRemove(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
@@ -118,6 +123,7 @@ namespace jtrack
             // open up listing UI
             new_listing_panel.Visibility = Visibility.Visible;
             new_listing_link_panel.Visibility = Visibility.Visible;
+            jauto_link.Focus();
             // clear any data inside the boxes
             jauto_link.Text = "";
             jman_title.Text = "";
@@ -164,6 +170,8 @@ namespace jtrack
             // open manual details UI
             new_listing_waiting_symbol.Visibility = Visibility.Collapsed;
             new_listing_details_panel.Visibility = Visibility.Visible;
+
+            jman_title.Focus();
         }
         private void Button_ManualSubmit(object sender, RoutedEventArgs e){
             if (string.IsNullOrWhiteSpace(jman_title.Text) || string.IsNullOrWhiteSpace(jman_employer.Text) || jman_status.SelectedIndex == -1){
@@ -191,6 +199,7 @@ namespace jtrack
             new_listing_link_panel.Visibility = Visibility.Collapsed;
             new_listing_waiting_symbol.Visibility = Visibility.Collapsed;
             new_listing_details_panel.Visibility = Visibility.Collapsed;
+            main_thing.Focus();
             new_listing_open = false;
             processing_url = false;
         }
@@ -199,6 +208,24 @@ namespace jtrack
             CloseNewListingUI();
         }
 
+
         // ----------------------------------------------------------------------------------------------------------------------
+
+        // JUNK TO MAKE NAVIGATION EASIER
+        private void jauto_link_KeyDown(object sender, KeyEventArgs e){
+            if (e.Key == Key.Enter){
+                e.Handled = true;
+                Button_AutoSubmit(null, null);
+        }}
+        private void jman_title_KeyDown(object sender, KeyEventArgs e){
+            if (e.Key == Key.Enter) {
+                e.Handled = true;
+                jman_employer.Focus();
+        }}
+        private void jman_employer_KeyDown(object sender, KeyEventArgs e){
+            if (e.Key == Key.Enter) {
+                e.Handled = true;
+                Button_ManualSubmit(null, null);
+        }}
     }
 }

@@ -105,6 +105,18 @@ namespace jtrack
         // ///////////////////////////////// // --------------------------------------------------------------
         // MANUAL LISTING ITEM INTERACTIONS //
         // /////////////////////////////// //
+        private int GetSelectedItemIndex(int index){
+            if (index == -1) throw new Exception("forgot to check index == -1");
+
+            jdata.jobject? selected_job = null;
+            selected_job = ((List<JobListing>)listings_panel.ItemsSource)[index].data;
+            // reselect the previously selected entry if its still in the UI
+            if (selected_job != null)
+                for (int i = 0; i < listings.Count; i++)
+                    if (listings[i] == selected_job)
+                        return i;
+            throw new Exception("failed to find item!!");
+        }
         private void listings_panel_SelectionChanged(object sender, SelectionChangedEventArgs e){
             if (listings_panel.SelectedIndex == -1)
                  listing_menu.Visibility = Visibility.Collapsed;
@@ -112,38 +124,40 @@ namespace jtrack
         }
         public void ListingOrderUp(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
-            if (listings_panel.SelectedIndex == 0) return; // cant shift up if we're already at 0
             ListingSwap(listings_panel.SelectedIndex-1);
         }
         public void ListingOrderDown(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return; }
-            if (listings_panel.SelectedIndex >= listings.Count-1) return; // cant shift down if we're at the bottom
             ListingSwap(listings_panel.SelectedIndex+1);
         }
         private void ListingSwap(int dst){
+            var UI_elems = (List<JobListing>)listings_panel.ItemsSource;
+            if (dst < 0) return; // cant shift up if we're already at 0
+            if (dst >= UI_elems.Count) return; // cant shift down if we're at the bottom
+            int selected_listing_index = GetSelectedItemIndex(listings_panel.SelectedIndex);
+            int new_listing_index = GetSelectedItemIndex(dst);
             // pop it then add it at the new index
-            var item = listings[listings_panel.SelectedIndex];
-            listings.RemoveAt(listings_panel.SelectedIndex);
-            listings.Insert(dst, item);
+            var item = listings[selected_listing_index];
+            listings.RemoveAt(selected_listing_index);
+            listings.Insert(new_listing_index, item);
             // save changes to disk
             jSerializer.serialize(listings, filter_map);
-            reload_listings();
-            listings_panel.SelectedIndex = dst;
+            reload_listings(); // this should automatically reselect whatever one we just moved
         }
         public void ListingLink(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
-            try{Process.Start(new ProcessStartInfo { FileName = listings[listings_panel.SelectedIndex].link, UseShellExecute = true });
+            try{Process.Start(new ProcessStartInfo { FileName = listings[GetSelectedItemIndex(listings_panel.SelectedIndex)].link, UseShellExecute = true });
             } catch(Exception ex){PostError(ex.Message);}
         }
         public void ListingLinkCopy(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1) { PostError("No selected listing!!"); return; }
-            Clipboard.SetText(listings[listings_panel.SelectedIndex].link);
+            Clipboard.SetText(listings[GetSelectedItemIndex(listings_panel.SelectedIndex)].link);
         }
         public void ListingRemove(object sender, RoutedEventArgs e){
             if (listings_panel.SelectedIndex == -1){ PostError("No selected listing!!"); return;}
             // confirm that we actually want to delete the item!!
             if (MessageBox.Show("Are you sure you want to delete this item?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes){
-                listings.RemoveAt(listings_panel.SelectedIndex);
+                listings.RemoveAt(GetSelectedItemIndex(listings_panel.SelectedIndex));
                 jSerializer.serialize(listings, filter_map); // save changes to disk
                 reload_listings();
             }
